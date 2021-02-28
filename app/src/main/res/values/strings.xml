@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">DepremFectherDemo1</string>
+    <string name="textview">TextView</string>
+    <string name="button">Button</string>
+    <string name="date" />
+    <string name="yenile">Yenile</string>
+    <string name="center">center</string>
+    <string name="epicenter" />
+    <string name="magnitude">magnitude</string>
+    <string name="action_search" />
+</resources>
