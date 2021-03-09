@@ -2,7 +2,7 @@
 This app lists newest 500 earthquake by fetching datas from koeri.bon.edu.tr 
 
 
-<img src="EarthQuake.gif" width="400" height="1000">
+<img src="EarthQuake.gif" width"540" height="960">
 
 
 Here is some of the features:
