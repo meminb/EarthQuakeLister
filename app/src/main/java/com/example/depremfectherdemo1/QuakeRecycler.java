@@ -2,6 +2,11 @@ package com.example.depremfectherdemo1;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
+import android.graphics.drawable.ShapeDrawable;
+import android.graphics.drawable.shapes.Shape;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -18,6 +23,7 @@ import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -43,6 +49,8 @@ public class QuakeRecycler extends Fragment {
         mQuakeRecycler=(RecyclerView) view.findViewById(R.id.recycler_view);
         mQuakeRecycler.setLayoutManager(new LinearLayoutManager(getActivity()));
 
+        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(mQuakeRecycler.getContext(), DividerItemDecoration.VERTICAL);
+        mQuakeRecycler.addItemDecoration(dividerItemDecoration);
 
 
         updateUI();
@@ -57,7 +65,7 @@ public class QuakeRecycler extends Fragment {
 
 /**menu**/
     @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater){
+    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater){
         super.onCreateOptionsMenu(menu,inflater);
         inflater.inflate(R.menu.menu_bar,menu);
         mSearchView=(SearchView) menu.findItem(R.id.action_search).getActionView();
@@ -85,21 +93,12 @@ public class QuakeRecycler extends Fragment {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item){
-        switch (item.getItemId()){
-            case R.id.refresh_button:
-                updateUI();
-                   /** QuakeLab.get(getActivity()).add(
-                            new Quake("2000.11.11 11:11:01",
-                                    Float.parseFloat("1.1"), Float.parseFloat("1.1"),
-                                    Float.parseFloat("1.1"), 7f, "temp[8] + + temp[9]"));**/
-
-
-                mQuakeAdapter.notifyDataSetChanged();
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
-
+        if (item.getItemId() == R.id.refresh_button) {
+            updateUI();
+            mQuakeAdapter.notifyDataSetChanged();
+            return true;
         }
+        return super.onOptionsItemSelected(item);
     }
 
 
@@ -107,7 +106,7 @@ public class QuakeRecycler extends Fragment {
     private void updateUI(){
         getBodyText();
         QuakeLab ep=  QuakeLab.get(getActivity());
-        List<Quake> Quakes=ep.getmQuakes();
+        List<Quake> Quakes= QuakeLab.getmQuakes();
 
         if (mQuakeAdapter==null){
             mQuakeAdapter=new QuakeAdapter(Quakes);
@@ -156,7 +155,7 @@ public class QuakeRecycler extends Fragment {
 
 
             //new SimpleDateFormat("yyyy.MM.dd hh:mm:ss").parse(temp[0] + " " + temp[1])
-        }/**for (int i=1;i<100;i++){
+        }/*for (int i=1;i<100;i++){
 
             try {
                 QuakeLab.get(getActivity()).add(
@@ -195,9 +194,9 @@ public class QuakeRecycler extends Fragment {
 
         public void bind(Quake quake){
             mQuake=quake;
-            mDate.setText(mQuake.getDate().toString() );
+            mDate.setText(mQuake.getDate());
             mEpicenter.setText(mQuake.getEpicenter());
-            mMagnitude.setText( Float.toString(mQuake.getMagnitude()));
+            mMagnitude.setText((mQuake.getMagnitude()+""));
 
 
         }
@@ -247,7 +246,21 @@ public class QuakeRecycler extends Fragment {
             if(Hex.length()==1){
                 Hex="0"+Hex;
             }
-            holder.mConstLay.setBackgroundColor(Color.parseColor("#"+"ff"+Hex+Hex));
+           // holder.mConstLay.setBackgroundColor(Color.parseColor("#"+"ff"+Hex+Hex));
+
+           // holder.mMagnitude.setBackgroundColor(Color.parseColor("#"+"ff"+Hex+Hex));
+
+
+            Drawable background = holder.mMagnitude.getBackground();
+            if (background instanceof ShapeDrawable) {
+                ((ShapeDrawable)background).getPaint().setColor(Color.parseColor("#"+"ff"+Hex+Hex));
+            } else if (background instanceof GradientDrawable) {
+                ((GradientDrawable)background).setColor(Color.parseColor("#"+"ff"+Hex+Hex));
+            } else if (background instanceof ColorDrawable) {
+                ((ColorDrawable)background).setColor(Color.parseColor("#"+"ff"+Hex+Hex));
+            }
+
+
             holder.bind(e);
         }
 
