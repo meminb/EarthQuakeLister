@@ -1,12 +1,10 @@
 package com.example.depremfectherdemo1;
 
-import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.ShapeDrawable;
-import android.graphics.drawable.shapes.Shape;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -14,7 +12,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CheckBox;
 import android.widget.SearchView;
 import android.widget.TextView;
 
@@ -22,16 +19,14 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -41,6 +36,9 @@ public class QuakeRecycler extends Fragment {
     private RecyclerView mQuakeRecycler;
     private QuakeAdapter mQuakeAdapter;
     private SearchView mSearchView;
+
+    private DataService dataService;
+    private ObjectMapper objectMapper = new ObjectMapper();
 
     @Nullable
     @Override
@@ -52,6 +50,7 @@ public class QuakeRecycler extends Fragment {
         DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(mQuakeRecycler.getContext(), DividerItemDecoration.VERTICAL);
         mQuakeRecycler.addItemDecoration(dividerItemDecoration);
 
+        dataService = new DataService();
 
         updateUI();
 
@@ -104,7 +103,13 @@ public class QuakeRecycler extends Fragment {
 
 
     private void updateUI(){
-        getBodyText();
+
+
+        try {
+            setQuakesFromKandilliApi();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         QuakeLab ep=  QuakeLab.get(getActivity());
         List<Quake> Quakes= QuakeLab.getmQuakes();
 
@@ -117,63 +122,64 @@ public class QuakeRecycler extends Fragment {
 
     }
 
+    private void setQuakesFromKandilliApi() throws IOException {
 
+        List quakes = dataService.getQuakesFromOrhanApiAndKandilli();
+        QuakeLab lab = QuakeLab.get(getActivity());
+
+        for (Object entry: quakes         ) {
+            lab.add(objectMapper.convertValue(entry,Quake.class));
+        }
+
+    }
+
+/*
     private void getBodyText() {
         final StringBuilder builder = new StringBuilder();
-        Thread t=new Thread(new Runnable() {
+        Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
-                    String url = "http://www.koeri.boun.edu.tr/scripts/lst0.asp";//your website url
+
+                    String url = "https://www.koeri.boun.edu.tr/scripts/lst0.asp";//your website url
                     Document doc = Jsoup.connect(url).get();
 
                     Element body = doc.body();
                     builder.append(body.text());
+
+
+
 
                 } catch (Exception e) {
                     builder.append("Error : ").append(e.getMessage()).append("\n");
                 }
             }
         });
-        t.start();
+        thread.start();
         try {
-            t.join();
+            thread.join();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
         String[] AllData;
         AllData = builder.toString().split("\n");
-        QuakeLab.get(getActivity()).clear();
-        for (int i = 7; i < 500; i++) {
+        System.out.println(Arrays.toString(AllData));
+       // QuakeLab.get(getActivity()).clear();
+        for (int i = 7; i < 500; i++) { System.out.println(AllData.length);
             String[] temp = AllData[i].split(" +");
-
-                System.out.println(Arrays.toString(temp));
                 QuakeLab.get(getActivity()).add(
                         new Quake(temp[0] + " " + temp[1].substring(0,5),
                         Float.parseFloat(temp[2]), Float.parseFloat(temp[3]),
-                        Float.parseFloat(temp[4]), Float.parseFloat(temp[6]), temp[8] + " " + temp[9]));
+                        Float.parseFloat(temp[4]),
+                                Float.parseFloat(temp[6]), temp[8] + " " + temp[9]));
 
 
-            //new SimpleDateFormat("yyyy.MM.dd hh:mm:ss").parse(temp[0] + " " + temp[1])
-        }/*for (int i=1;i<100;i++){
-
-            try {
-                QuakeLab.get(getActivity()).add(
-                        new Quake(new SimpleDateFormat("yyyy.MM.dd hh:mm:ss").parse("2000.11.11 11:11:01"),
-                                Float.parseFloat("1.1"), Float.parseFloat("1.1"),
-                                Float.parseFloat("1.1"), (float)i/10, "temp[8] + + temp[9]"));
-            } catch (ParseException e) {
-                e.printStackTrace();
-            }
-
-
-        }**/
-
+        }
 
     }
 
 
-
+*/
 
 
     private class QuakeHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
